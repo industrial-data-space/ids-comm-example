@@ -1,0 +1,68 @@
+group = 'de.fhg.aisec.ids'
+version = '1.0.0'
+
+apply plugin: 'java'
+apply plugin: 'maven-publish'
+apply plugin: 'signing'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    // References IAIS repository that contains the infomodel artifacts
+    maven {
+        url 'https://maven.iais.fraunhofer.de/artifactory/eis-ids-public/'
+    }
+}
+
+dependencies {
+    implementation group: "de.fraunhofer.aisec.ids", name: "ids-comm", version: '1.0.1'
+
+    implementation group: "javax.xml.bind", name: "jaxb-api", version: '2.2.11'
+    implementation group: "com.sun.xml.bind", name: "jaxb-core", version: '2.2.11'
+    implementation group: "com.sun.xml.bind", name: "jaxb-impl", version: '2.2.11'
+
+    testImplementation group: 'junit', name: 'junit', version: '4.12'
+    testImplementation group: 'org.mockito', name: 'mockito-all', version: '1.10.19'
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+tasks.withType(Jar) {
+    jar {
+        manifest {
+            // set the vendor
+            attributes 'Bundle-Vendor': 'Fraunhofer AISEC'
+        }
+    }
+}
+
+// Separate task for fat jar required, otherwise "publish" (see below) publishes the fat jar
+task fatJar (type: Jar) {
+    manifest {
+        attributes "Main-Class": "de.fhg.aisec.ids.comm.app.Client"
+    }
+
+    from {
+        //noinspection GroovyAssignabilityCheck
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+
+    archiveAppendix = 'bundle'
+}
+// Build fat jar after default jar task
+jar.finalizedBy fatJar
+
+task sourcesJar(type: Jar) {
+    from sourceSets.main.allJava
+    archiveClassifier = 'sources'
+}
+
+task javadocJar(type: Jar) {
+    from javadoc
+    archiveClassifier = 'javadoc'
+}
