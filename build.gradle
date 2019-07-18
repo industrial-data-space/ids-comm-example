@@ -1,5 +1,5 @@
 group = 'de.fhg.aisec.ids'
-version = '1.0.0'
+version = '1.0.1'
 
 apply plugin: 'java'
 apply plugin: 'maven-publish'
@@ -9,7 +9,6 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 repositories {
-    mavenLocal()
     mavenCentral()
     // References IAIS repository that contains the infomodel artifacts
     maven {
